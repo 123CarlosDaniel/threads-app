@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import Thread from '../models/thread.model'
 import User from '../models/user.model'
 import { connectToDB } from '../mongoose'
+import Community from '../models/community.model'
 
 interface Params {
   text: string
@@ -14,15 +15,27 @@ interface Params {
 
 export async function createThread(data: Params) {
   connectToDB()
+
+  const communityIdObject = await Community.findOne(
+    { id: data.communityId },
+    { _id: 1 }
+  )
+    console.log({communityIdObject})
   const createdThread = await Thread.create({
     text: data.text,
     author: data.author,
-    community: null,
+    community: communityIdObject,
   })
 
   await User.findByIdAndUpdate(data.author, {
     $push: { threads: createdThread._id },
   })
+
+  if (communityIdObject) {
+    await Community.findByIdAndUpdate(communityIdObject, {
+      $push: { threads: createdThread._id },
+    })
+  }
 
   revalidatePath(data.path)
 }
@@ -51,7 +64,7 @@ export async function fetchThreads(pageNumber = 1, pageSize = 20) {
   const posts = await threadsQuery.exec()
   const isNext = totalPostsCount > posts.length + skipAmount
 
-  return { posts, isNext } as {posts: any[], isNext: boolean}
+  return { posts, isNext } as { posts: any[]; isNext: boolean }
 }
 
 export async function fetchThreadById(id: string) {
@@ -118,4 +131,3 @@ export async function addCommentToThread(
     throw new Error(`Error adding comment to thread ${error.message}`)
   }
 }
-

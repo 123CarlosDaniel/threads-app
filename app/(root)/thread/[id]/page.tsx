@@ -12,7 +12,7 @@ async function ThreadPage({ params }: { params: { id: string } }) {
   if (!user) return null
 
   const userInfo = await fetchUser(user.id)
-  if (!userInfo.onboarded) redirect('/onboarding')
+  if (!userInfo?.onboarded) redirect('/onboarding')
 
   const thread = await fetchThreadById(params.id)
 

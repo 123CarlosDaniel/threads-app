@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   threads: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Threads',
+      ref: 'Thread',
     },
   ],
   onboarded: {

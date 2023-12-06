@@ -10,7 +10,7 @@ async function CreateThreadPage() {
 
   const userInfo = await fetchUser(user.id)
 
-  if(!userInfo.onboarded) redirect('/onboarding')
+  if(!userInfo?.onboarded) redirect('/onboarding')
   return (
     <>
         <div className="head-text">CreateThreadPage</div>

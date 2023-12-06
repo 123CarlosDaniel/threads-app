@@ -5,6 +5,7 @@ import User from '../models/user.model'
 import { connectToDB } from '../mongoose'
 import Thread from '../models/thread.model'
 import { FilterQuery, SortOrder } from 'mongoose'
+import Community from '../models/community.model'
 
 interface Params {
   userId: string
@@ -40,11 +41,10 @@ export async function updateUser(data: Params): Promise<void> {
 export async function fetchUser(userId: string) {
   try {
     connectToDB()
-    return (await User.findOne({ id: userId })) as any
-    // .populate({
-    //   path: 'communities',
-    //   model: Community
-    // })
+    return (await User.findOne({ id: userId }))?.populate({
+      path: 'communities',
+      model: Community,
+    })
   } catch (error: any) {
     throw new Error(`Failed to fetch user: ${error.message}`)
   }
@@ -58,10 +58,11 @@ export async function fetchUserPosts(userId: string) {
       path: 'threads',
       model: Thread,
       populate: [
-        // {
-        //   path: 'community',
-        //   model: Community,
-        //   select: 'name id image _id',
+        {
+          path: 'community',
+          model: Community,
+          select: 'name id image _id'
+        },
         {
           path: 'children',
           model: Thread,
@@ -129,14 +130,14 @@ export async function getActivity(userId: string) {
     const childThreadsIds = userThreads.reduce((acc, userThread) => {
       return acc.concat(userThread.children)
     }, [])
-    
+
     const replies = await Thread.find({
-      _id: {$in: childThreadsIds},
-      author: {$ne: userId}
+      _id: { $in: childThreadsIds },
+      author: { $ne: userId },
     }).populate({
       path: 'author',
       model: User,
-      select: 'name image _id id'
+      select: 'name image _id id',
     })
 
     return replies as any[]

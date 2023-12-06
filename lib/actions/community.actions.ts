@@ -1,6 +1,6 @@
 'use server'
 
-import { FilterQuery, Schema, SortOrder } from 'mongoose'
+import { FilterQuery, SortOrder } from 'mongoose'
 
 import Community from '../models/community.model'
 import Thread from '../models/thread.model'
@@ -18,6 +18,7 @@ export async function createCommunity(
 ) {
   try {
     connectToDB()
+    console.log('creating organization')
 
     // Find the user with the provided unique id
     const user = await User.findOne({ id: createdById })
